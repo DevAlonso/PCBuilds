@@ -11,9 +11,10 @@ import {
     Platform
 } from 'react-native';
 
-function BuildModal({ visible, onClose, onSave }) {
-    const [nombre, setNombre] = useState('');
-    const [tipo, setTipo] = useState('Gaming');
+function EditBuildModal({ visible, onClose, onSave, buildData }) {
+    // buildData tiene: { nombre, tipo, imagen_path, id }
+    const [nombre, setNombre] = useState(buildData?.nombre || '');
+    const [tipo, setTipo] = useState(buildData?.tipo || 'Gaming');
 
     return (
         <Modal
@@ -22,13 +23,13 @@ function BuildModal({ visible, onClose, onSave }) {
             transparent={true}
             onRequestClose={onClose}
         >
-            <KeyboardAvoidingView
+            <KeyboardAvoidingView 
                 style={styles.modalOverlay}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <View style={styles.modalContent}>
-                    <ScrollView showsVerticalScrollIndicator={true}>
-                        <Text style={styles.modalTitle}>Nueva Build</Text>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+                        <Text style={styles.modalTitle}>Editar Build</Text>
 
                         <Text style={styles.label}>Nombre de la Build</Text>
                         <TextInput
@@ -38,7 +39,7 @@ function BuildModal({ visible, onClose, onSave }) {
                             value={nombre}
                             onChangeText={setNombre}
                         />
-
+                        
                         <Text style={styles.label}>Tipo</Text>
                         <View style={styles.typeSelector}>
                             {['Gaming', 'Oficina', 'Streaming', 'Edición'].map((tipoOption) => (
@@ -59,7 +60,7 @@ function BuildModal({ visible, onClose, onSave }) {
                                 </TouchableOpacity>
                             ))}
                         </View>
-
+                        
                         <View style={styles.modalButtons}>
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.cancelButton]}
@@ -73,8 +74,7 @@ function BuildModal({ visible, onClose, onSave }) {
                                 onPress={() => {
                                     if (nombre.trim()) {
                                         onSave(nombre, tipo);
-                                        setNombre('');
-                                        setTipo('Gaming');
+                                        onClose();
                                     } else {
                                         alert('El nombre es obligatorio');
                                     }
@@ -90,7 +90,7 @@ function BuildModal({ visible, onClose, onSave }) {
     );
 }
 
-export default BuildModal;
+export default EditBuildModal;
 
 const styles = StyleSheet.create({
     modalOverlay: {

@@ -6,17 +6,17 @@ import {
   ActivityIndicator,
   Text,
   TouchableOpacity,
-  Modal,
-  TextInput,
+  Alert,
 } from "react-native";
 import TopBar from "./layout/TopBar";
 import { SafeAreaView } from "react-native-safe-area-context";
 import PcCard from "@/src/components/PcCard";
-import React, { useEffect, useState } from "react";
-import { createBuild, getBuilds } from './services/Api'
+import React, { useState, useCallback } from "react";
+import { createBuild, deleteBuild, getBuilds } from './services/Api'
 import { Ionicons } from '@expo/vector-icons';
 import BuildModal from '@/src/components/BuildModal';
-import { Alert } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
+import MapView, { Marker } from 'react-native-maps';
 
 
 function App() {
@@ -24,19 +24,50 @@ function App() {
   const [loading, setLoading] = useState(true);
   const [modalVisible, setModalVisible] = useState(false);
 
-
-
-  useEffect(() => {
-    getData();
-  }, [])
+  const borrarBuild = async (buildId) => {
+    const success = await deleteBuild(buildId);
+    if (success) {
+      setBuildsList(buildsList.filter(build => build.id !== buildId))
+      alert("La build se ha borrado correctamente")
+    } else {
+      alert("No se ha podido borrar la build")
+    }
+  }
 
   const getData = async () => {
-    setLoading(true)
+    setLoading(true);
     const builds = await getBuilds();
-    console.log('Datos recibidos:', builds);
-    setBuildsList(builds)
-    setLoading(false)
-  }
+    setBuildsList(builds);
+    setLoading(false);
+  };
+  useFocusEffect(
+    useCallback(() => {
+      getData();
+    }, [])
+  );
+
+  const FooterMapa = () => (
+    <View style={styles.mapContainer}>
+      <Text style={styles.mapTitle}>Visita nuestra Sede (Everest)</Text>
+      <MapView
+        style={styles.map}
+        initialRegion={{
+          latitude: 27.9881,
+          longitude: 86.9250,
+          latitudeDelta: 0.09,
+          longitudeDelta: 0.04,
+        }}
+      >
+        <Marker
+          coordinate={{ latitude: 27.9881, longitude: 86.9250 }}
+          title="Sede Central"
+          description="En la cima del mundo"
+        />
+      </MapView>
+    </View>
+  );
+
+
 
   if (loading) {
     return (
@@ -54,7 +85,7 @@ function App() {
   return (
     <SafeAreaView style={styles.safeArea}>
       <StatusBar barStyle="light-content" backgroundColor="#050816" />
-      <TopBar />
+      <TopBar titulo={"Mis Builds"} />
       <FlatList
         data={buildsList}
         keyExtractor={(item) => item.id.toString()}
@@ -63,10 +94,13 @@ function App() {
           <PcCard
             nombre={item.nombre}
             tipo={item.tipo}
-            precio={0}
-            image_path={require('../assets/images/pc-image.jpg')}
+            precio={item.precio_total}
+            id={item.id}
+            borrarBuild={borrarBuild}
+            onUpdate={getData}
           />
         )}
+        ListFooterComponent={FooterMapa}
       />
 
       <TouchableOpacity
@@ -80,17 +114,16 @@ function App() {
         onClose={() => setModalVisible(false)}
         onSave={async (nombre, tipo) => {
           const success = await createBuild(nombre, tipo);
-
           if (success) {
-            alert('Build creada');
+            Alert.alert('Éxito', 'Build creada');
             await getData();
             setModalVisible(false);
           } else {
-            alert('Error al crear');
+            Alert.alert('Error', 'Error al crear');
           }
         }}
-      />
 
+      />
     </SafeAreaView>
   );
 }
@@ -118,12 +151,12 @@ const styles = StyleSheet.create({
   },
   fab: {
     position: 'absolute',
-    bottom: 30,
+    bottom: 50,
     right: 20,
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#60a5fa',
+    backgroundColor: '#8b5cf6',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
@@ -131,5 +164,24 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 4 },
     shadowOpacity: 0.3,
     shadowRadius: 4,
+  },
+  mapContainer: {
+    marginBottom: 80,
+    backgroundColor: '#1c242d',
+    borderRadius: 16,
+    overflow: 'hidden',
+    padding: 10,
+  },
+  mapTitle: {
+    color: '#ffffff',
+    fontSize: 18,
+    fontWeight: 'bold',
+    marginBottom: 10,
+    textAlign: 'center',
+  },
+  map: {
+    width: '100%',
+    height: 200,
+    borderRadius: 12,
   },
 });

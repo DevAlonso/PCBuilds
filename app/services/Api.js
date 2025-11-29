@@ -5,7 +5,7 @@ const SUPABASE_ANON_KEY =
 const headers = {
   apikey: SUPABASE_ANON_KEY,
   Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
-  'Content-Type': 'application/json',
+  "Content-Type": "application/json",
 };
 
 export const getBuilds = async () => {
@@ -22,7 +22,7 @@ export const getBuilds = async () => {
 
 export const createBuild = (nombre, tipo) => {
   return fetch(`${SUPABASE_URL}/rest/v1/builds`, {
-    method: "POST",
+    method: 'POST',
     headers: headers,
     body: JSON.stringify({
       nombre: nombre,
@@ -30,6 +30,82 @@ export const createBuild = (nombre, tipo) => {
       imagen_path: null,
     }),
   })
-  .then((response) => response.ok)
-  .catch(() => false);
+    .then((response) => response.ok)
+    .catch(() => false);
 };
+
+
+export const deleteBuild = (id) => {
+  return fetch(`${SUPABASE_URL}/rest/v1/builds?id=eq.${id}`, {
+    method: "DELETE",
+    headers: headers,
+  })
+    .then((response) => response.ok)
+    .catch(() => false);
+};
+
+export const updateBuild = (buildId, nombre, tipo) => {
+  return fetch(`${SUPABASE_URL}/rest/v1/builds?id=eq.${buildId}`, {
+    method: 'PATCH',
+    headers: headers,
+    body: JSON.stringify({
+      nombre: nombre,
+      tipo: tipo,
+    }),
+  })
+    .then((response) => response.ok)
+    .catch(() => false);
+};
+
+
+export const getComponents = (buildId) => {
+  return fetch(`${SUPABASE_URL}/rest/v1/componentes?build_id=eq.${buildId}&select=*`, {
+    method: "GET",
+    headers: headers,
+  }).then((response) => {
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.json();
+  });
+};
+
+export const createComponent = (nombre, tipo, precio, buildId) => {
+  return fetch(`${SUPABASE_URL}/rest/v1/componentes`, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      nombre: nombre,
+      tipo: tipo,
+      precio: precio,
+      build_id: buildId,
+    }),
+  })
+    .then((response) => response.ok)
+    .catch(() => false);
+};
+
+export const deleteComponent = (id) => {
+  return fetch(`${SUPABASE_URL}/rest/v1/componentes?id=eq.${id}`, {
+    method: "DELETE",
+    headers: headers,
+  })
+    .then((response) => response.ok)
+    .catch(() => false);
+};
+
+
+export const updateComponent = (id, nombre, tipo, precio) => {
+  return fetch(`${SUPABASE_URL}/rest/v1/componentes?id=eq.${id}`, {
+    method: 'PATCH',
+    headers: headers,
+    body: JSON.stringify({
+      nombre: nombre,
+      tipo: tipo,
+      precio: precio
+    }),
+  })
+    .then((response) => response.ok)
+    .catch(() => false);
+};
+

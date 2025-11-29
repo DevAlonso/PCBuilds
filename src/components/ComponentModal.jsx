@@ -10,10 +10,12 @@ import {
     ScrollView,
     Platform
 } from 'react-native';
+import { Picker } from '@react-native-picker/picker';
 
-function BuildModal({ visible, onClose, onSave }) {
+function ComponentModal({ visible, onClose, onSave }) {
     const [nombre, setNombre] = useState('');
-    const [tipo, setTipo] = useState('Gaming');
+    const [tipo, setTipo] = useState('GPU');
+    const [precio, setPrecio] = useState('');
 
     return (
         <Modal
@@ -22,42 +24,49 @@ function BuildModal({ visible, onClose, onSave }) {
             transparent={true}
             onRequestClose={onClose}
         >
-            <KeyboardAvoidingView
+            <KeyboardAvoidingView 
                 style={styles.modalOverlay}
                 behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             >
                 <View style={styles.modalContent}>
                     <ScrollView showsVerticalScrollIndicator={true}>
-                        <Text style={styles.modalTitle}>Nueva Build</Text>
-
-                        <Text style={styles.label}>Nombre de la Build</Text>
+                        <Text style={styles.modalTitle}>Nuevo Componente</Text>
+                        <Text style={styles.label}>Nombre del Componente</Text>
                         <TextInput
                             style={styles.input}
-                            placeholder="Ej: Build Gaming RTX 4070"
+                            placeholder="Ej: RTX 4070"
                             placeholderTextColor="#666"
                             value={nombre}
                             onChangeText={setNombre}
                         />
 
+                        <Text style={styles.label}>Precio</Text>
+                        <TextInput
+                            style={styles.input}
+                            placeholder="Ej: 499 €"
+                            placeholderTextColor="#666"
+                            value={precio}
+                            onChangeText={setPrecio}
+                            keyboardType="numeric"
+                        />
+
                         <Text style={styles.label}>Tipo</Text>
-                        <View style={styles.typeSelector}>
-                            {['Gaming', 'Oficina', 'Streaming', 'Edición'].map((tipoOption) => (
-                                <TouchableOpacity
-                                    key={tipoOption}
-                                    style={[
-                                        styles.typeButton,
-                                        tipo === tipoOption && styles.typeButtonActive
-                                    ]}
-                                    onPress={() => setTipo(tipoOption)}
-                                >
-                                    <Text style={[
-                                        styles.typeButtonText,
-                                        tipo === tipoOption && styles.typeButtonTextActive
-                                    ]}>
-                                        {tipoOption}
-                                    </Text>
-                                </TouchableOpacity>
-                            ))}
+                        <View style={styles.pickerContainer}>
+                            <Picker
+                                selectedValue={tipo}
+                                onValueChange={(itemValue) => setTipo(itemValue)}
+                                style={styles.picker}
+                                dropdownIconColor="#60a5fa"
+                            >
+                                <Picker.Item label="CPU" value="CPU" />
+                                <Picker.Item label="GPU" value="GPU" />
+                                <Picker.Item label="RAM" value="RAM" />
+                                <Picker.Item label="Almacenamiento" value="ALMACENAMIENTO" />
+                                <Picker.Item label="Placa Base" value="PLACA BASE" />
+                                <Picker.Item label="PSU" value="PSU" />
+                                <Picker.Item label="Caja" value="CAJA" />
+                                <Picker.Item label="Disipador" value="DISIPADOR" />
+                            </Picker>
                         </View>
 
                         <View style={styles.modalButtons}>
@@ -71,12 +80,13 @@ function BuildModal({ visible, onClose, onSave }) {
                             <TouchableOpacity
                                 style={[styles.modalButton, styles.saveButton]}
                                 onPress={() => {
-                                    if (nombre.trim()) {
-                                        onSave(nombre, tipo);
+                                    if (nombre.trim() && parseFloat(precio) > 0) {
+                                        onSave(nombre, tipo, parseFloat(precio));
                                         setNombre('');
-                                        setTipo('Gaming');
+                                        setTipo('GPU');
+                                        setPrecio('');
                                     } else {
-                                        alert('El nombre es obligatorio');
+                                        alert('El nombre y precio son obligatorios');
                                     }
                                 }}
                             >
@@ -90,7 +100,7 @@ function BuildModal({ visible, onClose, onSave }) {
     );
 }
 
-export default BuildModal;
+export default ComponentModal;
 
 const styles = StyleSheet.create({
     modalOverlay: {
@@ -129,31 +139,16 @@ const styles = StyleSheet.create({
         borderWidth: 1,
         borderColor: '#34495e',
     },
-    typeSelector: {
-        flexDirection: 'row',
-        flexWrap: 'wrap',
-        gap: 8,
-        marginTop: 8,
-    },
-    typeButton: {
-        paddingHorizontal: 16,
-        paddingVertical: 8,
-        borderRadius: 20,
+    pickerContainer: {
         backgroundColor: '#2c3e50',
+        borderRadius: 8,
         borderWidth: 1,
         borderColor: '#34495e',
+        overflow: 'hidden',
     },
-    typeButtonActive: {
-        backgroundColor: '#60a5fa',
-        borderColor: '#60a5fa',
-    },
-    typeButtonText: {
-        color: '#999',
-        fontSize: 14,
-        fontWeight: '600',
-    },
-    typeButtonTextActive: {
+    picker: {
         color: '#ffffff',
+        backgroundColor: 'transparent',
     },
     modalButtons: {
         flexDirection: 'row',

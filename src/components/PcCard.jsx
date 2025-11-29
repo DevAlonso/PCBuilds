@@ -1,50 +1,105 @@
 import { View, Image, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { Ionicons } from '@expo/vector-icons';
 import { useState } from "react";
+import { useRouter } from 'expo-router';
+import EditBuildModal from './EditBuildModal';
+import { updateBuild } from '../../app/services/Api';
 
 const getTagColor = (tag) => {
   if (!tag) return "#60a5fa";
   switch (tag.toLowerCase()) {
-    case "gaming":
-      return "#f87171";
-    case "oficina":
-      return "#34d399";
-    case "streaming":
-      return "#a78bfa";
-    case "edición":
-      return "#d7bd3aff";
-    default:
-      return "#60a5fa";
+    case "gaming": return "#f87171";
+    case "oficina": return "#34d399";
+    case "streaming": return "#a78bfa";
+    case "edición": return "#d7bd3aff";
+    default: return "#60a5fa";
   }
 };
 
-function PcCard({ nombre, tipo, precio, image_path }) {
+function PcCard({ nombre, tipo, precio, id, borrarBuild, onUpdate }) {
   const [visibilidadAjustes, setVisibilidadAjustes] = useState(false);
+  const [editModalVisible, setEditModalVisible] = useState(false);
+  const router = useRouter();
 
+  const borrarBtn = () => {
+    borrarBuild(id);
+    setVisibilidadAjustes(false);
+  }
+
+  const handleEdit = async (nuevoNombre, nuevoTipo) => {
+    const success = await updateBuild(id, nuevoNombre, nuevoTipo);
+
+    if (success) {
+      alert('Build actualizada correctamente');
+      setEditModalVisible(false);
+      setVisibilidadAjustes(false);
+      if (onUpdate) onUpdate();
+    } else {
+      alert('Error al actualizar');
+    }
+  };
+
+  const handleCardPress = () => {
+    router.push(`/components/${id}`);
+  }
 
   return (
-    <View style={styles.cardContainer}>
+    <>
+      <TouchableOpacity
+        style={styles.cardContainer}
+        onPress={handleCardPress}
+        activeOpacity={0.8}
+      >
+        <Image
+          style={styles.image}
+          source={require('../../assets/images/pc-image.jpg')}
+        />
+        <TouchableOpacity
+          style={styles.iconContainer}
+          onPress={() => setVisibilidadAjustes(!visibilidadAjustes)}
+        >
+          <Ionicons name="settings" size={28} color="#ffffff" />
+        </TouchableOpacity>
 
-      <Image style={styles.image} source={image_path} />
-      <TouchableOpacity style={styles.iconContainer} onPress={()=> setVisibilidadAjustes(!visibilidadAjustes)}>
-        <Ionicons name="settings" size={28} color="#ffffff" />
-      </TouchableOpacity>
-      <View style={styles.content}>
-        <View style={styles.chip}>
-          <Text style={[styles.chipText, { color: getTagColor(tipo) }]}>
-            {tipo}
-          </Text>
-        </View>
-        <Text style={styles.title}>{nombre}</Text>
-        <Text style={styles.price}>{precio}</Text>
-        {visibilidadAjustes &&
-          <View style={styles.buttonsContainer}>
-            <TouchableOpacity style={styles.buttonContainer}> <Text style={styles.buttonsText}>Editar</Text> </TouchableOpacity>
-            <TouchableOpacity style={styles.buttonContainer}> <Text style={styles.buttonsText}>Borrar</Text> </TouchableOpacity>
+        <View style={styles.content}>
+          <View style={styles.chip}>
+            <Text style={[styles.chipText, { color: getTagColor(tipo) }]}>
+              {tipo}
+            </Text>
           </View>
-        }
-      </View>
-    </View>
+          <Text style={styles.title}>{nombre}</Text>
+          <Text style={styles.price}>{precio} €</Text>
+
+          {visibilidadAjustes && (
+            <View style={styles.buttonsContainer}>
+              <TouchableOpacity
+                style={[styles.buttonContainer, { backgroundColor: "#8b5cf6" }]}
+                onPress={() => {
+                  setEditModalVisible(true);
+                  setVisibilidadAjustes(false);
+                }}
+              >
+                <Text style={styles.buttonsText}>Editar</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={borrarBtn}
+                style={[styles.buttonContainer, { backgroundColor: "#ef4444" }]}
+              >
+                <Text style={styles.buttonsText}>Borrar</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+        </View>
+      </TouchableOpacity>
+
+      <EditBuildModal
+        visible={editModalVisible}
+        onClose={() => setEditModalVisible(false)}
+        onSave={handleEdit}
+        buildData={{ nombre, tipo, id }}
+      />
+    </>
   );
 }
 
@@ -97,14 +152,14 @@ const styles = StyleSheet.create({
     gap: 50
   },
   buttonContainer: {
-    backgroundColor: '#ffffff',
     paddingHorizontal: 15,
     paddingVertical: 4,
-    borderRadius: 20,
+    borderRadius: 8,
   },
   buttonsText: {
     fontSize: 20,
     fontWeight: "500",
+    color: "white",
   },
   iconContainer: {
     position: 'absolute',
@@ -113,7 +168,7 @@ const styles = StyleSheet.create({
     width: 42,
     height: 42,
     borderRadius: 28,
-    backgroundColor: '#60a5fa',
+    backgroundColor: '#475569',
     justifyContent: 'center',
     alignItems: 'center',
     elevation: 8,
