@@ -48,7 +48,7 @@ function App() {
 
   const FooterMapa = () => (
     <View style={styles.mapContainer}>
-      <Text style={styles.mapTitle}>Visita nuestra Sede (Everest)</Text>
+      <Text style={styles.mapTitle}>Visita nuestra Sede</Text>
       <MapView
         style={styles.map}
         initialRegion={{
@@ -67,8 +67,6 @@ function App() {
     </View>
   );
 
-
-
   if (loading) {
     return (
       <SafeAreaView style={styles.safeArea}>
@@ -80,7 +78,6 @@ function App() {
       </SafeAreaView>
     );
   }
-
 
   return (
     <SafeAreaView style={styles.safeArea}>

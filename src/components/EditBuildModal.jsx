@@ -12,9 +12,9 @@ import {
 } from 'react-native';
 
 function EditBuildModal({ visible, onClose, onSave, buildData }) {
-    // buildData tiene: { nombre, tipo, imagen_path, id }
-    const [nombre, setNombre] = useState(buildData?.nombre || '');
-    const [tipo, setTipo] = useState(buildData?.tipo || 'Gaming');
+    // buildData tiene: { nombre, tipo, id }
+    const [nombre, setNombre] = useState(buildData.nombre);
+    const [tipo, setTipo] = useState(buildData.tipo);
 
     return (
         <Modal

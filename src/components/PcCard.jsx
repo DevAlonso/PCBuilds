@@ -33,7 +33,7 @@ function PcCard({ nombre, tipo, precio, id, borrarBuild, onUpdate }) {
       alert('Build actualizada correctamente');
       setEditModalVisible(false);
       setVisibilidadAjustes(false);
-      if (onUpdate) onUpdate();
+      onUpdate();
     } else {
       alert('Error al actualizar');
     }
